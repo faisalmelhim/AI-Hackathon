@@ -1,0 +1,47 @@
+
+=====FILE: backend/app/main.py=====
+```python
+#
+# main.py: The main entrypoint for the FastAPI backend application.
+# - Initializes the FastAPI app.
+# - Configures CORS middleware to allow frontend access.
+# - Includes all the API endpoint routers.
+#
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.routers import upload, analyze, memo, modeling
+
+# --- App Initialization ---
+app = FastAPI(
+    title="Investment AI Agent",
+    version="0.1.0",
+    description="A backend service for an AI-powered investment analysis tool.",
+)
+
+# --- CORS Middleware Configuration ---
+# This allows the frontend to make requests to the backend.
+origins = [
+    "http://localhost:5173",  # Default Vite port
+    "http://localhost:3000",  # Common alternative for React dev
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- API Routers ---
+app.include_router(upload.router, prefix="/api", tags=["Upload"])
+app.include_router(analyze.router, prefix="/api", tags=["Analysis"])
+app.include_router(memo.router, prefix="/api", tags=["Memo"])
+app.include_router(modeling.router, prefix="/api", tags=["Modeling"])
+
+# --- Health Check Endpoint ---
+@app.get("/health", tags=["Health"])
+def health_check():
+    """A simple endpoint to confirm that the server is running."""
+    return {"status": "ok", "version": "0.1.0"}
